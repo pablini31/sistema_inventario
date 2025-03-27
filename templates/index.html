@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sistema de Inventario de Huevos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --background-color: #f8f9fa;
+            --text-color: #212529;
+            --card-bg: #ffffff;
+            --table-bg: #ffffff;
+            --border-color: #dee2e6;
+            --nav-tab-color: #2c3e50;
+            --nav-tab-active-color: #3498db;
+            --footer-bg: #2c3e50;
+            --nav-tab-text: #2c3e50;
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #1a1a1a;
+            --secondary-color: #2980b9;
+            --accent-color: #c0392b;
+            --background-color: #121212;
+            --text-color: #ffffff;
+            --card-bg: #1e1e1e;
+            --table-bg: #1e1e1e;
+            --border-color: #333333;
+            --nav-tab-color: #ffffff;
+            --nav-tab-active-color: #3498db;
+            --footer-bg: #1a1a1a;
+            --nav-tab-text: #ffffff;
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            transition: all 0.3s ease;
+            min-height: 100vh;
+            padding-bottom: 100px; /* Espacio para el footer */
+        }
+
+        .navbar {
+            background-color: var(--primary-color);
+            padding: 1rem;
+        }
+
+        .navbar-brand, .nav-link {
+            color: white !important;
+        }
+
+        .nav-tabs {
+            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 2rem;
+            background: transparent;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none; /* Firefox */
+        }
+
+        .nav-tabs::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Edge */
+        }
+
+        .nav-tabs .nav-link {
+            color: var(--nav-tab-text);
+            border: none;
+            padding: 1rem 2rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            background: transparent;
+            white-space: nowrap;
+        }
+
+        .nav-tabs .nav-link:hover {
+            color: var(--nav-tab-active-color);
+            background: transparent;
+        }
+
+        .nav-tabs .nav-link.active {
+            color: var(--nav-tab-active-color);
+            border-bottom: 3px solid var(--nav-tab-active-color);
+            background: transparent;
+        }
+
+        .nav-tabs .nav-item {
+            background: transparent;
+        }
+
+        .tab-content {
+            background: transparent;
+        }
+
+        .tab-pane {
+            background: transparent;
+        }
+
+        .section {
+            background: var(--card-bg);
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .section h2 {
+            color: var(--text-color);
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+        }
+
+        .tab-pane h2 {
+            color: var(--text-color);
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+        }
+
+        .table {
+            background-color: var(--table-bg);
+            color: var(--text-color);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .table th {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 1rem;
+        }
+
+        .table td {
+            border-color: var(--border-color);
+        }
+
+        .table tbody tr:hover {
+            background-color: var(--border-color);
+        }
+
+        .btn-primary {
+            background-color: var(--secondary-color);
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--nav-tab-active-color);
+            transform: translateY(-2px);
+        }
+
+        .form-control, .form-select {
+            background-color: var(--card-bg);
+            border-color: var(--border-color);
+            color: var(--text-color);
+            border-radius: 5px;
+            padding: 0.5rem 1rem;
+        }
+
+        .form-control:focus, .form-select:focus {
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+        }
+
+        .theme-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--secondary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        .footer {
+            background-color: var(--footer-bg);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            z-index: 100;
+        }
+
+        .stats-card {
+            background: linear-gradient(135deg, var(--secondary-color), var(--nav-tab-active-color));
+            color: white;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .stats-card i {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .stats-card h3 {
+            font-size: 2rem;
+            margin: 0;
+        }
+
+        .stats-card p {
+            margin: 0;
+            opacity: 0.8;
+        }
+
+        .badge {
+            padding: 0.5rem 1rem;
+            font-weight: 500;
+        }
+
+        .badge.bg-success {
+            background-color: var(--accent-color) !important;
+        }
+
+        .badge.bg-danger {
+            background-color: #e74c3c !important;
+        }
+
+        .badge.bg-warning {
+            background-color: #f1c40f !important;
+        }
+
+        /* Ajustes para dispositivos móviles */
+        @media (max-width: 768px) {
+            .navbar-brand {
+                font-size: 1.1rem;
+            }
+            
+            .nav-tabs .nav-link {
+                padding: 0.5rem 0.7rem;
+                font-size: 0.9rem;
+            }
+            
+            .table-responsive {
+                font-size: 0.9rem;
+            }
+            
+            .section {
+                padding: 1rem;
+            }
+            
+            .footer {
+                padding: 0.5rem;
+                font-size: 0.8rem;
+            }
+            
+            .theme-toggle {
+                width: 40px;
+                height: 40px;
+                bottom: 80px; /* Para que no tape el footer en móviles */
+            }
+            
+            .stats-card {
+                padding: 1rem;
+            }
+            
+            .stats-card h3 {
+                font-size: 1.5rem;
+            }
+        }
+
+        /* Ajustes para tablas en móvil */
+        @media (max-width: 576px) {
+            .table-sm-wrap {
+                white-space: normal !important;
+            }
+            
+            .table-sm-wrap th, 
+            .table-sm-wrap td {
+                min-width: auto !important;
+            }
+            
+            .btn-sm-block {
+                width: 100%;
+                margin-bottom: 0.5rem;
+            }
+            
+            .hide-xs {
+                display: none;
+            }
+            
+            .btn {
+                padding: 0.25rem 0.5rem;
+                font-size: 0.875rem;
+            }
+            
+            .section h2 {
+                font-size: 1.25rem;
+                margin-bottom: 1rem;
+            }
+            
+            .table th, .table td {
+                padding: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-egg me-2"></i>
+                Sistema de Inventario de Huevos
+            </a>
+            <div class="navbar-nav ms-auto">
+                {% if session.usuario_rol == 'admin' %}
+                <a class="nav-link" href="{{ url_for('configuracion') }}">
+                    <i class="fas fa-cog me-1"></i>Configuración
+                </a>
+                {% endif %}
+                <a class="nav-link" href="{{ url_for('logout') }}">
+                    <i class="fas fa-sign-out-alt me-1"></i>Cerrar Sesión
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" id="inventario-tab" data-bs-toggle="tab" href="#inventario" role="tab" aria-controls="inventario" aria-selected="true" data-i18n="inventario">Inventario</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="movimientos-tab" data-bs-toggle="tab" href="#movimientos" role="tab" aria-controls="movimientos" aria-selected="false" data-i18n="movimientos">Movimientos</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="clientes-tab" data-bs-toggle="tab" href="#clientes" role="tab" aria-controls="clientes" aria-selected="false" data-i18n="clientes">Clientes</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="repartidores-tab" data-bs-toggle="tab" href="#repartidores" role="tab" aria-controls="repartidores" aria-selected="false" data-i18n="repartidores">Repartidores</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="pedidos-tab" data-bs-toggle="tab" href="#pedidos" role="tab" aria-controls="pedidos" aria-selected="false" data-i18n="pedidos">Pedidos</a>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="myTabContent">
+            <!-- Sección de Inventario -->
+            <div class="tab-pane fade show active" id="inventario" role="tabpanel">
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <div class="stats-card">
+                            <i class="fas fa-boxes"></i>
+                            <h3>{{ productos|length }}</h3>
+                            <p>Productos en Inventario</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stats-card">
+                            <i class="fas fa-arrow-up"></i>
+                            <h3>{{ movimientos|selectattr('tipo', 'equalto', 'entrada')|list|length }}</h3>
+                            <p>Entradas Totales</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stats-card">
+                            <i class="fas fa-arrow-down"></i>
+                            <h3>{{ movimientos|selectattr('tipo', 'equalto', 'salida')|list|length }}</h3>
+                            <p>Salidas Totales</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fas fa-list me-2"></i>Inventario Actual</h2>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Producto</th>
+                                    <th>Cajas</th>
+                                    <th>Rejas</th>
+                                    <th class="hide-xs">Piezas</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for producto in productos %}
+                                <tr>
+                                    <td>{{ producto.nombre }}</td>
+                                    <td>{{ producto.cajas }}</td>
+                                    <td>{{ producto.rejas }}</td>
+                                    <td class="hide-xs">{{ producto.piezas }}</td>
+                                    <td>
+                                        {% if producto.cajas < 10 or producto.rejas < 10 %}
+                                        <span class="badge bg-danger">Bajo Stock</span>
+                                        {% else %}
+                                        <span class="badge bg-success">Stock OK</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fas fa-plus-circle me-2"></i>Registrar Movimiento</h2>
+                    <form action="{{ url_for('registrar_movimiento') }}" method="POST" class="needs-validation" novalidate>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Tipo de Movimiento</label>
+                                    <select name="tipo" class="form-select" required>
+                                        <option value="entrada">Entrada</option>
+                                        <option value="salida">Salida</option>
+                                        <option value="devolucion">Devolución</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Producto</label>
+                                    <select name="producto_id" class="form-select" required>
+                                        {% for producto in productos %}
+                                        <option value="{{ producto.id }}">{{ producto.nombre }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Usuario</label>
+                                    <input type="text" name="usuario" class="form-control" value="{{ session.usuario_nombre }}" readonly>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Cajas</label>
+                                    <input type="number" name="cajas" class="form-control" required min="0">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Rejas</label>
+                                    <input type="number" name="rejas" class="form-control" required min="0">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Piezas</label>
+                                    <input type="number" name="piezas" class="form-control" required min="0">
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Registrar Movimiento
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Sección de Movimientos -->
+            <div class="tab-pane fade" id="movimientos" role="tabpanel">
+                <div class="section">
+                    <h2><i class="fas fa-history me-2"></i>Historial de Movimientos</h2>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Tipo</th>
+                                    <th>Producto</th>
+                                    <th class="hide-xs">Cajas</th>
+                                    <th class="hide-xs">Rejas</th>
+                                    <th class="hide-xs">Piezas</th>
+                                    <th>Usuario</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for movimiento in movimientos %}
+                                <tr>
+                                    <td>{{ movimiento.fecha.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                                    <td>
+                                        {% if movimiento.tipo == 'entrada' %}
+                                        <span class="badge bg-success">Entrada</span>
+                                        {% elif movimiento.tipo == 'salida' %}
+                                        <span class="badge bg-danger">Salida</span>
+                                        {% else %}
+                                        <span class="badge bg-warning">Devolución</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ movimiento.producto.nombre }}</td>
+                                    <td class="hide-xs">{{ movimiento.cajas }}</td>
+                                    <td class="hide-xs">{{ movimiento.rejas }}</td>
+                                    <td class="hide-xs">{{ movimiento.piezas }}</td>
+                                    <td>{{ session.usuario_nombre }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección de Clientes -->
+            <div class="tab-pane fade" id="clientes" role="tabpanel">
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <div class="stats-card">
+                            <i class="fas fa-users"></i>
+                            <h3>{{ clientes|length }}</h3>
+                            <p>Total de Clientes Registrados</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fas fa-user-plus me-2"></i>Registrar Nuevo Cliente</h2>
+                    <form action="{{ url_for('agregar_cliente') }}" method="POST" class="needs-validation" novalidate>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Nombre</label>
+                                    <input type="text" name="nombre" class="form-control" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Dirección</label>
+                                    <input type="text" name="direccion" class="form-control" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Teléfono</label>
+                                    <input type="tel" name="telefono" class="form-control" required>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Registrar Cliente
+                        </button>
+                    </form>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fas fa-list me-2"></i>Lista de Clientes</h2>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th class="hide-xs">Dirección</th>
+                                    <th>Teléfono</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for cliente in clientes %}
+                                <tr>
+                                    <td>{{ cliente.nombre }}</td>
+                                    <td class="hide-xs">{{ cliente.direccion }}</td>
+                                    <td>{{ cliente.telefono }}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-info">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-danger">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección de Repartidores -->
+            <div class="tab-pane fade" id="repartidores" role="tabpanel">
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <div class="stats-card">
+                            <i class="fas fa-truck"></i>
+                            <h3>{{ repartidores|length }}</h3>
+                            <p>Total de Repartidores</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fas fa-user-plus me-2"></i>Registrar Nuevo Repartidor</h2>
+                    <form action="{{ url_for('agregar_repartidor') }}" method="POST" class="needs-validation" novalidate>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Nombre</label>
+                                    <input type="text" name="nombre" class="form-control" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Teléfono</label>
+                                    <input type="tel" name="telefono" class="form-control" required>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Registrar Repartidor
+                        </button>
+                    </form>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fas fa-list me-2"></i>Lista de Repartidores</h2>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Teléfono</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for repartidor in repartidores %}
+                                <tr>
+                                    <td>{{ repartidor.nombre }}</td>
+                                    <td>{{ repartidor.telefono }}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-info">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-danger">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección de Pedidos -->
+            <div class="tab-pane fade" id="pedidos" role="tabpanel">
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <div class="stats-card">
+                            <i class="fas fa-shopping-cart"></i>
+                            <h3>{{ pedidos|length }}</h3>
+                            <p>Total de Pedidos</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fas fa-plus-circle me-2"></i>Registrar Nuevo Pedido</h2>
+                    <form action="{{ url_for('registrar_pedido') }}" method="POST" class="needs-validation" novalidate>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Cliente</label>
+                                    <select name="cliente_id" class="form-select" required>
+                                        {% for cliente in clientes %}
+                                        <option value="{{ cliente.id }}">{{ cliente.nombre }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Repartidor</label>
+                                    <select name="repartidor_id" class="form-select" required>
+                                        {% for repartidor in repartidores %}
+                                        <option value="{{ repartidor.id }}">{{ repartidor.nombre }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Producto</label>
+                                    <select name="producto_id" class="form-select" required>
+                                        {% for producto in productos %}
+                                        <option value="{{ producto.id }}">{{ producto.nombre }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Cajas</label>
+                                    <input type="number" name="cajas" class="form-control" required min="0">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Rejas</label>
+                                    <input type="number" name="rejas" class="form-control" required min="0">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Piezas</label>
+                                    <input type="number" name="piezas" class="form-control" required min="0">
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Registrar Pedido
+                        </button>
+                    </form>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fas fa-history me-2"></i>Historial de Pedidos</h2>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Cliente</th>
+                                    <th class="hide-xs">Repartidor</th>
+                                    <th>Producto</th>
+                                    <th class="hide-xs">Cajas</th>
+                                    <th class="hide-xs">Rejas</th>
+                                    <th class="hide-xs">Piezas</th>
+                                    <th class="hide-xs">Fecha</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for pedido in pedidos %}
+                                <tr>
+                                    <td>{{ pedido.id }}</td>
+                                    <td>{{ pedido.cliente.nombre }}</td>
+                                    <td class="hide-xs">{{ pedido.repartidor.nombre }}</td>
+                                    <td>{{ pedido.producto.nombre }}</td>
+                                    <td class="hide-xs">{{ pedido.cajas }}</td>
+                                    <td class="hide-xs">{{ pedido.rejas }}</td>
+                                    <td class="hide-xs">{{ pedido.piezas }}</td>
+                                    <td class="hide-xs">{{ pedido.fecha.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                                    <td>
+                                        {% if pedido.estado == 'pendiente' %}
+                                        <span class="badge bg-warning" data-i18n="pendiente">Pendiente</span>
+                                        {% else %}
+                                        <span class="badge bg-success" data-i18n="entregado">Entregado</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <form action="{{ url_for('cambiar_estado_pedido', pedido_id=pedido.id) }}" method="POST" class="d-inline">
+                                            <input type="hidden" name="estado" value="{{ 'entregado' if pedido.estado == 'pendiente' else 'pendiente' }}">
+                                            <button type="submit" class="btn btn-sm {{ 'btn-success' if pedido.estado == 'pendiente' else 'btn-warning' }}">
+                                                {% if pedido.estado == 'pendiente' %}
+                                                <span data-i18n="marcarComoEntregado">Marcar como entregado</span>
+                                                {% else %}
+                                                <span data-i18n="marcarComoPendiente">Marcar como pendiente</span>
+                                                {% endif %}
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <p class="mb-0">© 2025 Sistema de Inventario de Huevos. Desarrollado por alumno del 2B UTM.</p>
+            <p class="mb-0">24090577@alumno.utmetropolitana.edu.mx</p>
+        </div>
+    </footer>
+
+    <div class="theme-toggle" id="themeToggle">
+        <i class="fas fa-moon"></i>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Validación de formularios
+        (function () {
+            'use strict'
+            var forms = document.querySelectorAll('.needs-validation')
+            Array.prototype.slice.call(forms).forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+                    form.classList.add('was-validated')
+                }, false)
+            })
+        })()
+
+        // Manejo de errores de producto insuficiente
+        /*
+        document.addEventListener('DOMContentLoaded', function() {
+            const forms = document.querySelectorAll('form');
+            forms.forEach(form => {
+                form.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    try {
+                        const response = await fetch(form.action, {
+                            method: 'POST',
+                            body: new FormData(form)
+                        });
+                        const data = await response.json();
+                        if (data.error) {
+                            alert(data.error);
+                            return;
+                        }
+                        window.location.reload();
+                    } catch (error) {
+                        console.error('Error:', error);
+                        window.location.reload();
+                    }
+                });
+            });
+        });
+        */
+
+        // Manejo del modo oscuro
+        const themeToggle = document.getElementById('themeToggle');
+        const icon = themeToggle.querySelector('i');
+        
+        // Cargar preferencia guardada
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        updateIcon(savedTheme);
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateIcon(newTheme);
+        });
+
+        function updateIcon(theme) {
+            icon.className = theme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
+        }
+
+        // Función para detectar el idioma y mostrar textos
+        function actualizarIdioma() {
+            const idioma = '{{ config.idioma }}';
+            const textos = {
+                'es': {
+                    'inventario': 'Inventario',
+                    'movimientos': 'Movimientos',
+                    'clientes': 'Clientes',
+                    'repartidores': 'Repartidores',
+                    'pedidos': 'Pedidos',
+                    'titulo': 'Sistema de Inventario de Huevos',
+                    'pendiente': 'Pendiente',
+                    'entregado': 'Entregado',
+                    'marcarComoEntregado': 'Marcar como entregado',
+                    'marcarComoPendiente': 'Marcar como pendiente'
+                },
+                'en': {
+                    'inventario': 'Inventory',
+                    'movimientos': 'Movements',
+                    'clientes': 'Customers',
+                    'repartidores': 'Deliverers',
+                    'pedidos': 'Orders',
+                    'titulo': 'Egg Inventory System',
+                    'pendiente': 'Pending',
+                    'entregado': 'Delivered',
+                    'marcarComoEntregado': 'Mark as delivered',
+                    'marcarComoPendiente': 'Mark as pending'
+                }
+            };
+
+            // Actualizar textos en la interfaz
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (textos[idioma] && textos[idioma][key]) {
+                    el.textContent = textos[idioma][key];
+                }
+            });
+
+            // Actualizar el título de la página
+            document.title = textos[idioma]['titulo'];
+            document.querySelector('.navbar-brand').textContent = textos[idioma]['titulo'];
+        }
+
+        // Ejecutar al cargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            actualizarIdioma();
+        });
+
+        // Activar la pestaña especificada en el parámetro active_tab
+        document.addEventListener('DOMContentLoaded', function() {
+            const activeTab = '{{ active_tab }}';
+            if (activeTab) {
+                const tabEl = document.querySelector(`#${activeTab}-tab`);
+                if (tabEl) {
+                    const tab = new bootstrap.Tab(tabEl);
+                    tab.show();
+                }
+            }
+        });
+    </script>
+</body>
+</html> 
