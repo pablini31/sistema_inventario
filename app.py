@@ -382,43 +382,37 @@ def crear_usuario():
         return jsonify({'error': 'Datos de usuario incorrectos'})
 
 # Inicialización de la base de datos
+@app.before_first_request
 def init_db():
-    with app.app_context():
-        db.create_all()
-        
-        # Crear productos iniciales si no existen
-        productos_iniciales = [
-            "huevo rojo200", "huevo blanco sucio", "huevo blanco200",
-            "huevo rojo360", "huevo rojito", "huevo pewe"
-        ]
-        for nombre in productos_iniciales:
-            if not Producto.query.filter_by(nombre=nombre).first():
-                producto = Producto(nombre=nombre)
-                db.session.add(producto)
-        
-        # Crear usuario admin si no existe
-        admin = Usuario.query.filter_by(nombre='admin').first()
-        if not admin:
-            admin = Usuario(
-                nombre='admin',
-                password_hash=generate_password_hash('admin123'),
-                rol='admin'
-            )
-            db.session.add(admin)
-            print("Usuario admin creado exitosamente")
-        
-        # Crear configuración inicial si no existe
-        config = Configuracion.query.first()
-        if not config:
-            config = Configuracion()
-            db.session.add(config)
-            print("Configuración inicial creada exitosamente")
-        
-        db.session.commit()
-        print("Base de datos inicializada correctamente")
-
-# Inicializar la base de datos al arrancar
-init_db()
+    db.create_all()
+    
+    # Crear productos iniciales si no existen
+    productos_iniciales = [
+        "huevo rojo200", "huevo blanco sucio", "huevo blanco200",
+        "huevo rojo360", "huevo rojito", "huevo pewe"
+    ]
+    for nombre in productos_iniciales:
+        if not Producto.query.filter_by(nombre=nombre).first():
+            producto = Producto(nombre=nombre)
+            db.session.add(producto)
+    
+    # Crear usuario admin si no existe
+    admin = Usuario.query.filter_by(nombre='admin').first()
+    if not admin:
+        admin = Usuario(
+            nombre='admin',
+            password_hash=generate_password_hash('admin123'),
+            rol='admin'
+        )
+        db.session.add(admin)
+    
+    # Crear configuración inicial si no existe
+    config = Configuracion.query.first()
+    if not config:
+        config = Configuracion()
+        db.session.add(config)
+    
+    db.session.commit()
 
 if __name__ == '__main__':
     port = int(os.getenv('PORT', 5000))
