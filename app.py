@@ -381,7 +381,8 @@ def crear_usuario():
     else:
         return jsonify({'error': 'Datos de usuario incorrectos'})
 
-if __name__ == '__main__':
+# Inicialización de la base de datos
+def init_db():
     with app.app_context():
         db.create_all()
         
@@ -415,6 +416,10 @@ if __name__ == '__main__':
         
         db.session.commit()
         print("Base de datos inicializada correctamente")
-    
+
+# Inicializar la base de datos al arrancar
+init_db()
+
+if __name__ == '__main__':
     port = int(os.getenv('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
